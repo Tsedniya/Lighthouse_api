@@ -1,4 +1,4 @@
-// app/api/lighthouse/route.ts  (or pages/api/lighthouse.ts)
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export const POST = async (request: NextRequest) => {
@@ -48,10 +48,9 @@ export const POST = async (request: NextRequest) => {
     const data = await res.json();
     const lhr = data.lighthouseResult;
 
-    // Helper to extract useful parts
+ 
     const extractAudit = (id: string) => lhr.audits[id];
 
-    // Core metrics (the big numbers)
     const metrics = {
       FCP: extractAudit('first-contentful-paint')?.displayValue,
       LCP: extractAudit('largest-contentful-paint')?.displayValue,
@@ -62,7 +61,7 @@ export const POST = async (request: NextRequest) => {
       SI: extractAudit('speed-index')?.displayValue,
     };
 
-    // Scores
+    
     const scores = {
       performance: Math.round(lhr.categories.performance.score * 100),
       accessibility: Math.round(lhr.categories.accessibility.score * 100),
@@ -70,7 +69,7 @@ export const POST = async (request: NextRequest) => {
       seo: Math.round(lhr.categories.seo.score * 100),
     };
 
-    // Opportunities / Diagnostics (the ones shown with savings)
+ 
     const opportunities = Object.values(lhr.audits)
       .filter((audit: any) =>
         audit.scoreDisplayMode === 'numeric' ||
@@ -87,9 +86,9 @@ export const POST = async (request: NextRequest) => {
         details: audit.details ? simplifyDetails(audit.details) : null,
       }))
       .sort((a: any, b: any) => (b.numericValue || 0) - (a.numericValue || 0))
-      .slice(0, 20); // limit for sanity
+      .slice(0, 20); 
 
-    // Passed audits (green ones)
+   
     const passed = Object.values(lhr.audits)
       .filter((audit: any) => audit.score === 1 && audit.scoreDisplayMode !== 'notApplicable')
       .map((audit: any) => ({
@@ -97,7 +96,7 @@ export const POST = async (request: NextRequest) => {
         title: audit.title,
       }));
 
-    // Screenshots & thumbnails
+   
     const finalScreenshot = lhr.audits['final-screenshot']?.details?.data || null;
     const lcpElementScreenshot = extractAudit('largest-contentful-paint')?.details?.items?.[0]?.node?.snapshot || null;
 
@@ -112,8 +111,7 @@ export const POST = async (request: NextRequest) => {
       lcpScreenshot: lcpElementScreenshot,
       opportunities,
       passedAudits: passed,
-      // You can even return the full raw result if you want (careful with size)
-      // raw: data,
+     
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -123,7 +121,7 @@ export const POST = async (request: NextRequest) => {
   }
 };
 
-// Helper to make huge details usable (tables, items, etc.)
+
 function simplifyDetails(details: any) {
   if (!details || !details.items) return null;
 
